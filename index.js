@@ -156,6 +156,49 @@ app.get("/txs", async (req, res) => {
   }
 });
 
+// GET endpoint for Chainlink
+app.get("/", async (req, res) => {
+  try {
+    const from = req.query.from;
+    const to = req.query.to;
+    const startBlock = req.query.startBlock;
+
+    if (!from || !to || !startBlock) {
+      return res.status(400).json({ status: "errored", error: "Missing params: from, to, startBlock" });
+    }
+
+    const fromBlockHex = "0x" + Number(startBlock).toString(16);
+
+    const latestBlockResp = await axios.post(ALCHEMY_URL, {
+      jsonrpc: "2.0",
+      id: 1,
+      method: "eth_blockNumber",
+      params: [],
+    });
+    const toBlockHex = latestBlockResp.data.result;
+
+    const rawTransfers = await fetchAllTransfers({
+      fromAddress: from,
+      toAddress: to,
+      fromBlockHex,
+      toBlockHex,
+    });
+
+    const mapped = rawTransfers.map(mapTransfer);
+    const hasTransfers = mapped.length > 0;
+
+    // Chainlink cares only about the boolean result
+    res.status(200).json({
+      data: { hasTransfers, transfers: mapped },
+      result: hasTransfers,
+      statusCode: 200,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: "errored", error: err.message ?? "unknown error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`✅ Chainlink adapter running on http://localhost:${PORT}`);
 });
@@ -172,3 +215,5 @@ app.listen(PORT, () => {
         }
       }'
 */
+
+// Render URL https://alchemy-api.onrender.com
