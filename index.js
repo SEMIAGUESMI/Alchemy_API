@@ -187,10 +187,12 @@ app.get("/", async (req, res) => {
     const mapped = rawTransfers.map(mapTransfer);
     const hasTransfers = mapped.length > 0;
 
-    // Chainlink cares only about the boolean result
+    // Convert boolean to uint (0 or 1)
+    const resultValue = hasTransfers ? 1 : 0;
+
     res.status(200).json({
       data: { hasTransfers, transfers: mapped },
-      result: hasTransfers,
+      result: resultValue, // 0 or 1
       statusCode: 200,
     });
   } catch (err) {
@@ -217,3 +219,4 @@ app.listen(PORT, () => {
 */
 
 // Render URL https://alchemy-api.onrender.com
+//https://alchemy-api.onrender.com/?from=0xEcBdA29a86b46e80402ef68aE0f15c9d3785FDF5&to=0x7B3FA1B861a5D1826CD50347E768B6a5950493a2&startBlock=9277085
