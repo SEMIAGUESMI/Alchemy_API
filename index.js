@@ -191,7 +191,8 @@ app.get("/", async (req, res) => {
     const resultValue = hasTransfers ? 1 : 0;
 
     res.status(200).json({
-      data:  resultValue ,
+      data: { hasTransfers, transfers: mapped },
+      result: mapped.length, // 0 or 1
       statusCode: 200,
     });
   } catch (err) {
